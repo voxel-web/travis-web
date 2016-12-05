@@ -147,7 +147,11 @@ export default Ember.Service.extend({
       }
     }
     if (user) {
-      return this.get('ajax').get('/users/' + user.id).then((data) => {
+      return this.get('ajax').ajax('/user/' + user.id, 'get', {
+        headers: {
+          'Travis-API-Version': '3'
+        }
+      }).then((data) => {
         var userRecord;
         if (data.user.correct_scopes) {
           userRecord = this.loadUser(data.user);
@@ -258,11 +262,6 @@ export default Ember.Service.extend({
 
   userName: Ember.computed('currentUser.login', 'currentUser.name', function () {
     return this.get('currentUser.name') || this.get('currentUser.login');
-  }),
-
-  gravatarUrl: Ember.computed('currentUser.gravatarId', function () {
-    let gravatarId = this.get('currentUser.gravatarId');
-    return `${location.protocol}//www.gravatar.com/avatar/${gravatarId}?s=48&d=mm`;
   }),
 
   permissions: Ember.computed.alias('currentUser.permissions')
