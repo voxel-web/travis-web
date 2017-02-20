@@ -15,7 +15,7 @@ export default Ember.Controller.extend({
   @computed('cronJobs', 'model.branches.@each.exists_on_github')
   branchesWithoutCron(cronJobs, branches) {
     return branches
-             .filter(branch => branch.get('exists_on_github'))
+             .filter(branch => branch.get('existsOnGithub'))
              .filter(branch => {
                const branchName = branch.get('name');
                return ! cronJobs.any(cron => branchName === cron.get('branch.name'));
