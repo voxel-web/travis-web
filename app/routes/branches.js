@@ -10,10 +10,9 @@ export default TravisRoute.extend({
     let repoId = this.modelFor('repo').get('id');
     return Ember.RSVP.hash({
       activeBranches: this.store.paginated('branch', {
-        repoId: repoId,
-        existsOnGithub: true,
-        includeCommit: true,
-        includeRecent: true,
+        repository_id: repoId,
+        exists_on_github: true,
+        include: 'build.commit,branch.recent_builds',
         sort_by: 'last_build:desc'
       }, {
         filter: (branch) => branch.get('repoId') === repoId && branch.get('existsOnGithub'),
@@ -24,10 +23,9 @@ export default TravisRoute.extend({
         forceReload: true
       }),
       deletedBranches: this.store.paginated('branch', {
-        repoId: repoId,
-        existsOnGithub: false,
-        includeCommit: true,
-        includeRecent: true
+        limit: 0,
+        repository_id: repoId,
+        exists_on_github: false
       })
     });
   },

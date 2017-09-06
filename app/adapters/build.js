@@ -5,7 +5,9 @@ export default V3Adapter.extend({
 
   pathPrefix(modelName, id, snapshot, type, query) {
     if (type === 'query' && query.repository_id) {
-      return `repo/${query.repository_id}`;
+      let repoId = query.repository_id;
+      delete query.repository_id;
+      return `repo/${repoId}`;
     }
   }
 });

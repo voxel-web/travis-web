@@ -17,19 +17,14 @@ export default Ember.Component.extend({
     return this.get('externalLinks').githubCommit(slug, sha);
   },
 
-  @computed('branch.recentBuilds')
-  last5Builds(recentBuilds) {
-    if (recentBuilds.length >= 5) {
-      return recentBuilds.slice(0, 5);
-    } else {
-      return [...Array(5).keys()].map((item, index) => {
-        if (!Ember.isEmpty(recentBuilds[index])) {
-          return recentBuilds[index];
-        } else {
-          return item;
-        }
-      });
-    }
+  @computed('branch.builds.[]', 'branch.builds.@each.id', 'branch.builds.@each.eventType')
+  last5Builds(builds) {
+    return builds.
+      // when a build is pull request, it will have a branch set to target
+      // branch (mostly master) - we want to display only actual branch builds
+      // here
+      filter( (build) => build.get('eventType') !== 'pull_request' ).
+      sortBy('id').toArray().reverse().slice(0, 5);
   },
 
   actions: {
