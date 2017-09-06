@@ -14,6 +14,7 @@ import { service } from 'ember-decorators/service';
 
 export default Model.extend(DurationCalculations, DurationAttributes, {
   @service ajax: null,
+  @service jobConfigFetcher: null,
 
   logId: attr(),
   queue: attr(),
@@ -62,15 +63,21 @@ export default Model.extend(DurationCalculations, DurationAttributes, {
             return;
           }
           this.set('isFetchingConfig', true);
-          this.reload();
+          this.get('jobConfigFetcher').fetch(this.get('id')).then((config) => {
+            this.set('config', config);
+          });
         } else {
-          Ember.run.later(fetchConfig, 20);
+          Ember.run.later(this, fetchConfig, 20);
         }
       };
 
       fetchConfig();
     }
   },
+
+  repoSlug: Ember.computed('repositorySlug', function () {
+    return this.get('repositorySlug');
+  }),
 
   getCurrentState() {
     return this.get('currentState.stateName');

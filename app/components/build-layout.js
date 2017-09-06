@@ -15,7 +15,7 @@ export default Ember.Component.extend({
   @computed('build.jobs.@each.config')
   jobsLoaded(jobs) {
     if (jobs) {
-      return jobs.isEvery('config');
+      return jobs.isEvery('isLoaded');
     }
   },
 
