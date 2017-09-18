@@ -64,7 +64,7 @@ export default Model.extend(DurationCalculations, DurationAttributes, {
           }
           this.set('isFetchingConfig', true);
           this.get('jobConfigFetcher').fetch(this.get('id')).then((config) => {
-            this.set('config', config);
+            this.set('_config', config);
           });
         } else {
           Ember.run.later(this, fetchConfig, 20);

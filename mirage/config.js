@@ -246,7 +246,30 @@ export default function () {
     return this.serialize(job, 'job');
   });
 
-  this.get('/jobs');
+  this.get('/jobs/:id', function (schema, request) {
+    let job = schema.jobs.find(request.params.id);
+    return this.serialize(job, 'v2-job');
+  });
+
+  this.get('/jobs', function (schema, request) {
+    if (request.requestHeaders['Travis-API-Version'] === '3') {
+      let jobs = schema.jobs;
+      if (request.params.active) {
+        jobs = jobs.where((j) => ['created', 'queued', 'received', 'started'].includes(j.state) );
+      }
+      return jobs.all();
+    } else {
+      let jobs = schema.jobs;
+      if (request.params.ids) {
+        jobs = jobs.where((j) => ids.includes(j.id.toString()));
+      }
+      return this.serialize(jobs.all(), 'v2-job');
+    }
+  });
+
+  this.get('/build/:id/jobs', (schema, request) => {
+    return schema.jobs.where({ buildId: request.params.id });
+  });
 
   this.get('/build/:id/stages', (schema, request) => {
     return schema.stages.where({ buildId: request.params.id });
