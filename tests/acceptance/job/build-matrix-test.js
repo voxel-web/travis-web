@@ -23,6 +23,7 @@ test('visiting build matrix', function (assert) {
 
   visit(`/travis-ci/travis-web/builds/${build.id}`);
 
+  andThen(() => {});
   andThen(function () {
     assert.equal(buildPage.requiredJobs().count, 2, 'expected two required jobs in the matrix');
 

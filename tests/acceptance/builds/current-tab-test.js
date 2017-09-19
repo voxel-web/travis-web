@@ -56,7 +56,6 @@ test('renders most recent repository and most recent build when builds present, 
   jobTabs.configTab.click();
 
   andThen(function () {
-    pauseTest();
     assert.equal(jobTabs.configTab.contents, '{ \"language\": \"Hello\" }', 'config output is correct');
     assert.ok(jobTabs.configTab.isShowing, 'Displays the job config');
     assert.ok(jobTabs.logTab.isHidden, 'Job log is hidden');

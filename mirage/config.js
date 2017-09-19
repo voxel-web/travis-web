@@ -255,15 +255,17 @@ export default function () {
     if (request.requestHeaders['Travis-API-Version'] === '3') {
       let jobs = schema.jobs;
       if (request.params.active) {
-        jobs = jobs.where((j) => ['created', 'queued', 'received', 'started'].includes(j.state) );
+        jobs = jobs.where((j) => ['created', 'queued', 'received', 'started'].includes(j.state));
       }
-      return jobs.all();
+      return jobs.all ? jobs.all() : jobs;
     } else {
       let jobs = schema.jobs;
-      if (request.params.ids) {
+      let ids = request.queryParams.ids;
+      if (ids) {
         jobs = jobs.where((j) => ids.includes(j.id.toString()));
       }
-      return this.serialize(jobs.all(), 'v2-job');
+      jobs = jobs.all ? jobs.all() : jobs;
+      return this.serialize(jobs, 'v2-job');
     }
   });
 

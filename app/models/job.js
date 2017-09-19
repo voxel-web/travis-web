@@ -1,6 +1,5 @@
 /* global moment, Travis */
 
-import pickBy from 'npm:lodash.pickby';
 import Ember from 'ember';
 import Model from 'ember-data/model';
 import Log from 'travis/models/log';
@@ -51,28 +50,32 @@ export default Model.extend(DurationCalculations, DurationAttributes, {
     });
   },
 
-  // TODO: DO NOT SET OTHER PROPERTIES WITHIN A COMPUTED PROPERTY!
+  @alias('config.content') configLoaded: null,
+
   @computed('_config')
   config(config) {
+    let promise;
     if (config) {
-      return pickBy(config);
+      promise = Ember.RSVP.Promise.resolve(config);
     } else {
-      let fetchConfig = () => {
-        if (this.getCurrentState() !== 'root.loading') {
-          if (this.get('isFetchingConfig')) {
-            return;
+      promise = new Ember.RSVP.Promise((resolve, reject) => {
+        let fetchConfig = () => {
+          if (this.getCurrentState() !== 'root.loading') {
+            this.get('jobConfigFetcher').fetch(this.get('id')).then((config) => {
+              resolve(config);
+              this.set('_config', config);
+            });
+          } else {
+            Ember.run.later(this, fetchConfig, 20);
           }
-          this.set('isFetchingConfig', true);
-          this.get('jobConfigFetcher').fetch(this.get('id')).then((config) => {
-            this.set('_config', config);
-          });
-        } else {
-          Ember.run.later(this, fetchConfig, 20);
-        }
-      };
+        };
 
-      fetchConfig();
+        Ember.run.next(this, fetchConfig);
+      });
     }
+    let PromiseObject = Ember.ObjectProxy.extend(Ember.PromiseProxyMixin);
+
+    return PromiseObject.create({ promise });
   },
 
   repoSlug: Ember.computed('repositorySlug', function () {

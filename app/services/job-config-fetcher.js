@@ -6,24 +6,31 @@ export default Ember.Service.extend({
 
   init() {
     this.promisesByJobId = {};
+    this.resolvesByJobId = {};
     return this._super(...arguments);
   },
 
   fetch(jobId) {
-    let promise = new Ember.RSVP.Promise((resolve, reject) => {
-      this.promisesByJobId[jobId] = resolve;
-    });
-    Ember.run.once(this, 'flush');
-    return promise;
+    if (this.promisesByJobId[jobId]) {
+      return this.promisesByJobId[jobId];
+    } else {
+      let promise = new Ember.RSVP.Promise((resolve, reject) => {
+        this.resolvesByJobId[jobId] = resolve;
+      });
+      this.promisesByJobId[jobId] = promise;
+      Ember.run.once(this, 'flush');
+      return promise;
+    }
   },
 
   flush() {
-    let promisesByJobId = this.promisesByJobId;
+    let resolvesByJobId = this.resolvesByJobId;
     this.promisesByJobId = {};
-    let jobIds = Object.keys(promisesByJobId);
+    this.resolvesByJobId = {};
+    let jobIds = Object.keys(resolvesByJobId);
     this.get('ajax').ajax(`/jobs`, 'GET', { data: { ids: jobIds } }).then((data) => {
       data.jobs.forEach((jobData) => {
-        promisesByJobId[jobData.id.toString()](jobData.config);
+        resolvesByJobId[jobData.id.toString()](jobData.config);
       });
     });
   }
